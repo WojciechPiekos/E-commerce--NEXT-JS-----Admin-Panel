@@ -71,4 +71,23 @@ export default async function handler(req,res) {
            res.status(500).json({ message: error.message }) 
         }
     }
+
+    if (method === "DELETE") {
+        const id = req?.query?.id
+
+        if (!id) {
+            res.status(400).json({ message: false })
+        }
+
+        try {
+            const deletedProduct = await Product.findByIdAndDelete(id).exec()
+            if (!deletedProduct) {
+                res.status(400).json({message: false})
+            }
+            res.status(200).json({ message: true })
+        } catch (error) {
+            console.log(error.message)
+            res.status(400).json({ message: false })
+        }
+    }
 }
