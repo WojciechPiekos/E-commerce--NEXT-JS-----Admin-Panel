@@ -2,25 +2,29 @@ import Layout from "@/components/Layout";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Spinner from "./Spinner";
+import { ReactSortable } from "react-sortablejs";
 
 export default function ProductForm({
   _id,
   title: existingTitle,
   description: existingDescription,
   price: existingPrice,
-  images,
+  images: existingImages,
 }) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
   const [price, setPrice] = useState(existingPrice || 0);
   const [goToProducts, setGoToProducts] = useState(false);
+  const [images, setImages] = useState(existingImages || []);
+  const [isUploading, setIsUploading] = useState(false);
 
   const router = useRouter();
 
   const saveProduct = async (e) => {
     e.preventDefault();
 
-    const data = { title, description, price };
+    const data = { title, description, price, images };
 
     if (_id) {
       // update product
@@ -45,23 +49,30 @@ export default function ProductForm({
   }
 
   const uploadImages = async (e) => {
-
-    const files = e.target?.files
+    setIsUploading(true);
+    const files = e.target?.files;
     if (files?.length > 0) {
-        const data = new FormData()
-        for (const file of files) {
-            data.append("file", file)
-        }
-        
-        const res = await fetch('/api/upload', {
-            method: 'POST',
-            body: data,
-        })
-        console.log(res)
-    }
+      const data = new FormData();
+      for (const file of files) {
+        data.append("file", file);
+      }
 
+      try {
+        const res = await axios.post("/api/upload", data);
+        setImages((oldImages) => {
+          return [...oldImages, ...res.data.links];
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setIsUploading(false);
   };
-    
+
+  const updateImagesOrder = (images) => {
+    setImages(images)
+  };
+
   return (
     <>
       <form onSubmit={saveProduct}>
@@ -75,7 +86,23 @@ export default function ProductForm({
           onChange={(e) => setTitle(e.target.value)}
         />
         <label>Photos</label>
-        <div className="mb-2">
+        <div className="mb-2 flex flex-wrap gap-1">
+          <ReactSortable 
+            className="flex flex-wrap gap-1"
+            list={images} 
+            setList={updateImagesOrder}>
+            {!!images?.length &&
+              images.map((link) => (
+                <div className="h-24" key={link}>
+                  <img src={link} alt="" className="rounded-lg" />
+                </div>
+              ))}
+          </ReactSortable>
+          {isUploading && (
+            <div className="h-24 p-1 flex items-center">
+              <Spinner />
+            </div>
+          )}
           <label className="w-24 h-24 text-center flex justify-center items-center gap-1 text-sm text-gray-500 rounded-lg bg-gray-200 cursor-pointer">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -100,7 +127,6 @@ export default function ProductForm({
               onChange={uploadImages}
             />
           </label>
-          {!images?.length && <div>No photos in this product</div>}
         </div>
         <label htmlFor="description">Description</label>
         <textarea
