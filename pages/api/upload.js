@@ -39,6 +39,7 @@ export default async function handle(req, res) {
     res.json({links})
 }
 
+
 export const config = {
     api: {bodyParser: false},
 }
