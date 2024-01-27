@@ -1,7 +1,7 @@
 import Layout from "@/components/Layout";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Spinner from "./Spinner";
 import { ReactSortable } from "react-sortablejs";
 
@@ -11,20 +11,32 @@ export default function ProductForm({
   description: existingDescription,
   price: existingPrice,
   images: existingImages,
+  category: existingCategory
 }) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
   const [price, setPrice] = useState(existingPrice || 0);
+  const [category, setCategory] = useState(existingCategory || "")
   const [goToProducts, setGoToProducts] = useState(false);
   const [images, setImages] = useState(existingImages || []);
   const [isUploading, setIsUploading] = useState(false);
+  const [categories, setCategories] = useState([]);
 
   const router = useRouter();
+
+  useEffect(() => {
+    axios
+      .get("/api/categories")
+      .then((res) => {
+        setCategories(res.data);
+      })
+      .catch((err) => console.log(err.message));
+  }, []);
 
   const saveProduct = async (e) => {
     e.preventDefault();
 
-    const data = { title, description, price, images };
+    const data = { title, description, price, images, category };
 
     if (_id) {
       // update product
@@ -70,7 +82,7 @@ export default function ProductForm({
   };
 
   const updateImagesOrder = (images) => {
-    setImages(images)
+    setImages(images);
   };
 
   return (
@@ -85,12 +97,23 @@ export default function ProductForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
+        <label>Category</label>
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <option value="">Uncategorized</option>
+          {categories.length > 0 &&
+            categories.map((category) => (
+              <option value={category._id} key={category._id}>
+                {category.name}
+              </option>
+            ))}
+        </select>
         <label>Photos</label>
         <div className="mb-2 flex flex-wrap gap-1">
-          <ReactSortable 
+          <ReactSortable
             className="flex flex-wrap gap-1"
-            list={images} 
-            setList={updateImagesOrder}>
+            list={images}
+            setList={updateImagesOrder}
+          >
             {!!images?.length &&
               images.map((link) => (
                 <div className="h-24" key={link}>
