@@ -16,6 +16,10 @@ const ProductSchema = new Schema({
     images: {
         type: [String],
     },
+    category: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Category',
+    }
 })
 
 export const Product = models.Product || mongoose.model('Product', ProductSchema)

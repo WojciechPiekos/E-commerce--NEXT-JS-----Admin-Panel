@@ -42,14 +42,14 @@ export default async function handler(req,res) {
 
     if (method === "POST") {
 
-        const { title, description, price, images } = req.body
+        const { title, description, price, images, category } = req.body
 
         if (!title || price === 0) {
             res.status(400).json({ message: "All fileds are required" })
         }
         try {
             const productDocument = await Product.create({
-            title, description, price, images
+            title, description, price, images, category
             })
             res.status(201).json(productDocument)    
         } catch (error) {
@@ -60,10 +60,10 @@ export default async function handler(req,res) {
 
     if (method === "PUT") {
 
-        const { _id, title, description, price, images } = req.body
+        const { _id, title, description, price, images, category } = req.body
 
         try {
-            const updatedProduct = await Product.findByIdAndUpdate(_id, {title, description, price, images}, {new:true}).exec() 
+            const updatedProduct = await Product.findByIdAndUpdate(_id, {title, description, price, images, category}, {new:true}).exec() 
             res.status(200).json(updatedProduct) 
         } catch (error) {
            res.status(500).json({ message: error.message }) 

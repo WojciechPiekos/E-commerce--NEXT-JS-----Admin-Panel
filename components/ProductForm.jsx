@@ -22,7 +22,7 @@ export default function ProductForm({
   const [isUploading, setIsUploading] = useState(false);
   const [categories, setCategories] = useState([]);
 
-  const router = useRouter();
+  const router = useRouter(); 
 
   useEffect(() => {
     axios
