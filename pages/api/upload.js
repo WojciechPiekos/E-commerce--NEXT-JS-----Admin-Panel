@@ -2,10 +2,16 @@ import multiparty from 'multiparty'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import fs from 'fs'
 import mime from 'mime-types'
+import { mongooseConnect } from '@/lib/mongoose'
+import { isAdminRequest } from './auth/[...nextauth]'
 
 const bucketName = 'wojciech-next-ecommerce'
 
 export default async function handle(req, res) {
+
+    await mongooseConnect()
+    await isAdminRequest()
+
     const form = new multiparty.Form()
     const { fileds, files } = await new Promise((resolve,reject) => {
         form.parse(req, async (err, fileds, files) => {
