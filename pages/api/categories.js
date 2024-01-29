@@ -21,12 +21,15 @@ export default async function handle(req,res) {
     
     
     if (method === 'POST') {
-        const { name, parentCategory } = req.body
+        const { name, parentCategory, properties } = req.body
         if (!name) {
             res.status(400).json({ message: false })
         }
         try {
-            const response = await Category.create({name, parent: parentCategory})
+            const response = await Category.create({name,
+                parent: parentCategory || undefined, 
+                properties
+            })
             res.status(201).json(response)
         } catch (error) {
             console.log(error.message)
@@ -35,12 +38,18 @@ export default async function handle(req,res) {
     }
 
     if (method === 'PUT') {
-        const { name, parentCategory, _id } = req.body
+        const { name, parentCategory, properties, _id } = req.body
         if (!name, !_id) {
             res.status(400).json({ message: false })
         }
         try {
-            const response = await Category.findByIdAndUpdate(_id, {_id, name, parent: parentCategory}, {new: true})
+            const response = await Category.findByIdAndUpdate(_id, {_id, 
+                name, 
+                parent: parentCategory || undefined , 
+                properties
+                }, 
+                {new: true}
+            )
             res.status(201).json(response)
         } catch (error) {
             console.log(error.message)
